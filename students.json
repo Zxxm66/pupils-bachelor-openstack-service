@@ -1,0 +1,51 @@
+[
+  {
+    "id": 1,
+    "name": "Иванов Иван Иванович",
+    "course": 4,
+    "grade": 4.5,
+    "attended_labs": 90
+  },
+  {
+    "id": 2,
+    "name": "Петрова Мария Сергеевна",
+    "course": 3,
+    "grade": 4.0,
+    "attended_labs": 80
+  },
+  {
+    "id": 3,
+    "name": "Сидоров Алексей Петрович",
+    "course": 2,
+    "grade": 4.8,
+    "attended_labs": 95
+  },
+  {
+    "id": 4,
+    "name": "Козлова Анна Дмитриевна",
+    "course": 4,
+    "grade": 3.5,
+    "attended_labs": 85
+  },
+  {
+    "id": 5,
+    "name": "Новиков Дмитрий Олегович",
+    "course": 3,
+    "grade": 4.2,
+    "attended_labs": 70
+  },
+  {
+    "id": 6,
+    "name": "Смирнова Екатерина Игоревна",
+    "course": 4,
+    "grade": 5.0,
+    "attended_labs": 100
+  },
+  {
+    "id": 7,
+    "name": "Фёдоров Никита Александрович",
+    "course": 3,
+    "grade": 4.1,
+    "attended_labs": 76
+  }
+]

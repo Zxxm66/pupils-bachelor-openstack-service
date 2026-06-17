@@ -1,0 +1,14 @@
+# Copy this file to terraform.tfvars and fill in your values
+# terraform.tfvars is in .gitignore — credentials are never committed
+
+os_username         = "your-openstack-username"
+os_password         = "your-openstack-password"
+os_project_name     = "your-project-name"
+os_auth_url         = "http://controller:5000/v3"
+os_region           = "RegionOne"
+external_network_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+floating_ip_pool    = "public"
+image_name          = "Ubuntu-22.04"
+flavor_name         = "m1.small"
+public_key_path     = "~/.ssh/id_rsa.pub"
+docker_image        = "Zxxm66/pupils-bachelor-openstack-service:latest"

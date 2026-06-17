@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bachelor-service
+  labels:
+    app: bachelor-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bachelor-service
+  template:
+    metadata:
+      labels:
+        app: bachelor-service
+    spec:
+      containers:
+        - name: bachelor-service
+          image: Zxxm66/pupils-bachelor-openstack-service:latest
+          ports:
+            - containerPort: 5000
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "250m"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 20
