@@ -36,8 +36,8 @@ resource "openstack_networking_secgroup_rule_v2" "app_port" {
   direction         = "ingress"
   ethertype         = "IPv4"
   protocol          = "tcp"
-  port_range_min    = 5000
-  port_range_max    = 5000
+  port_range_min    = 8000
+  port_range_max    = 8000
   remote_ip_prefix  = "0.0.0.0/0"
   security_group_id = openstack_networking_secgroup_v2.bachelor_sg.id
 }
@@ -91,7 +91,7 @@ resource "openstack_compute_instance_v2" "bachelor_vm" {
     apt-get install -y docker.io
     systemctl enable docker
     systemctl start docker
-    docker run -d -p 5000:5000 ${var.docker_image}
+    docker run -d -p 8000:8000 --name pupils-bachelor ${var.docker_image}
   EOF
 }
 

@@ -58,5 +58,5 @@ variable "public_key_path" {
 variable "docker_image" {
   description = "Docker image to run on the VM"
   type        = string
-  default     = "Zxxm66/pupils-bachelor-openstack-service:latest"
+  default     = "DOCKERHUB_USERNAME/pupils-bachelor-openstack-service:latest"
 }

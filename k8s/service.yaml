@@ -1,12 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: bachelor-service
+  name: pupils-bachelor-service
+  namespace: pupils-bachelor
 spec:
   selector:
-    app: bachelor-service
+    app: pupils-bachelor
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 5000
+      port: 8000
+      targetPort: 8000
+      nodePort: 30080
   type: NodePort

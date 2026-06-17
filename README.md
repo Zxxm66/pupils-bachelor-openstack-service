@@ -1,12 +1,12 @@
 # pupils-bachelor-openstack-service
 
-REST-сервис на Flask для отбора студентов, претендующих на получение диплома бакалавра. Разработан в рамках лабораторной работы по дисциплине «Облачные технологии (OpenStack)».
+Учебный FastAPI-сервис для определения студентов, которые могут стать бакалаврами. Разработан в рамках лабораторной работы по дисциплине «Облачные технологии (OpenStack)».
 
 ## Структура проекта
 
 ```
 pupils-bachelor-openstack-service/
-├── app.py                         # Flask REST API
+├── app.py                         # FastAPI приложение
 ├── students.json                  # База данных студентов
 ├── requirements.txt               # Зависимости Python
 ├── Dockerfile                     # Контейнеризация приложения
@@ -20,6 +20,7 @@ pupils-bachelor-openstack-service/
 │   ├── outputs.tf
 │   └── terraform.tfvars.example
 └── k8s/                           # Kubernetes манифесты
+    ├── namespace.yaml
     ├── deployment.yaml
     └── service.yaml
 ```
@@ -38,75 +39,131 @@ pupils-bachelor-openstack-service/
 
 | Метод | Эндпоинт | Описание |
 |-------|----------|----------|
-| GET | `/students` | Все студенты |
-| GET | `/bachelor` | Кандидаты на бакалавра |
+| GET | `/` | Информация о сервисе |
 | GET | `/health` | Проверка состояния сервиса |
+| GET | `/students` | Все студенты |
+| GET | `/student/{name}` | Один студент по имени |
+| GET | `/bachelor` | Кандидаты на бакалавра |
 
-## Запуск
+Документация Swagger доступна на `/docs`.
 
-### Локально
+---
+
+## Пошаговая инструкция (для отчёта со скриншотами)
+
+### 1. Запуск локально
 
 ```bash
 pip install -r requirements.txt
 python app.py
-# Сервис доступен на http://localhost:5000
 ```
 
-### Docker
+Открой в браузере `http://127.0.0.1:8000/docs` — это и есть скриншот Swagger UI.
+
+### 2. Сборка Docker-образа
 
 ```bash
-docker build -t bachelor-service .
-docker run -d -p 5000:5000 bachelor-service
+docker build -t pupils-bachelor-openstack-service .
 ```
 
-### Проверка
+### 3. Запуск контейнера локально
 
 ```bash
-curl http://localhost:5000/health
-curl http://localhost:5000/students
-curl http://localhost:5000/bachelor
+docker run -d -p 8000:8000 --name pupils-bachelor pupils-bachelor-openstack-service
+docker ps
 ```
 
-## Деплой в OpenStack через Terraform
+### 4. Проверка API в контейнере
+
+```powershell
+curl.exe http://127.0.0.1:8000/health
+curl.exe http://127.0.0.1:8000/bachelor
+```
+
+### 5. Публикация образа в Docker Hub
+
+```bash
+docker login
+docker tag pupils-bachelor-openstack-service DOCKERHUB_USERNAME/pupils-bachelor-openstack-service:latest
+docker push DOCKERHUB_USERNAME/pupils-bachelor-openstack-service:latest
+```
+
+Зайди на `https://hub.docker.com/repositories/DOCKERHUB_USERNAME` — увидишь опубликованный образ.
+
+### 6. Деплой в OpenStack через Terraform
 
 ```bash
 cd terraform-openstack
 cp terraform.tfvars.example terraform.tfvars
-# заполнить terraform.tfvars своими данными OpenStack
+# заполнить terraform.tfvars данными доступа к OpenStack
 
 terraform init
 terraform plan
 terraform apply
 ```
 
-Terraform автоматически создаёт: сеть, подсеть, роутер, security group, VM с Ubuntu, floating IP и запускает Docker-контейнер на VM.
+После `apply` Terraform выведет `public_ip` и `service_url` — публичный IP созданной VM с уже запущенным контейнером.
 
 ```bash
-# Удалить все ресурсы
+terraform state list
+terraform output
+```
+
+### 7. Проверка инстанса в OpenStack Dashboard (Horizon)
+
+Зайди в веб-интерфейс OpenStack → Проект → Вычислительные ресурсы → Инстансы — там будет видна созданная VM со статусом "Активен" и публичным IP.
+
+### 8. Проверка API по публичному IP
+
+```powershell
+curl.exe http://PUBLIC_IP:8000/health
+curl.exe http://PUBLIC_IP:8000/bachelor
+```
+
+### 9. Проверка контейнера на самой VM
+
+```bash
+ssh ubuntu@PUBLIC_IP
+sudo docker ps
+sudo docker logs pupils-bachelor
+```
+
+### 10. Деплой в Kubernetes (например, через minikube)
+
+```bash
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+
+kubectl rollout status deployment/pupils-bachelor-deployment -n pupils-bachelor
+kubectl get pods -n pupils-bachelor
+kubectl get svc -n pupils-bachelor
+kubectl get endpoints -n pupils-bachelor
+```
+
+### 11. Проверка через port-forward
+
+```bash
+kubectl port-forward svc/pupils-bachelor-service -n pupils-bachelor 8000:8000
+curl http://127.0.0.1:8000/bachelor
+```
+
+### 12. Удаление ресурсов после демонстрации
+
+```bash
 terraform destroy
+kubectl delete namespace pupils-bachelor
+docker rm -f pupils-bachelor
 ```
-
-## Kubernetes
-
-```bash
-cd k8s
-kubectl apply -f deployment.yaml
-kubectl apply -f service.yaml
-
-kubectl get pods
-kubectl get services
-```
-
-Деплоится 2 реплики с health check'ами (`/health`).
 
 ## Формат данных студента
 
 ```json
 {
-  "id": 1,
-  "name": "Иванов Иван Иванович",
+  "name": "Ivan Petrov",
   "course": 4,
-  "grade": 4.5,
-  "attended_labs": 90
+  "grade": 5,
+  "attended_labs": 90,
+  "specialization": "Protected Automated Systems"
 }
 ```
